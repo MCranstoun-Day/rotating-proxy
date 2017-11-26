@@ -1,11 +1,11 @@
-docker-rotating-proxy
+tor-rotating-proxy
 =====================
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/shaddysignal/tor-rotating-proxy.svg)](https://hub.docker.com/r/shaddysignal/tor-rotating-proxy/)
 
 ```
                Docker Container
-               -------------------------------------
+               --------------------------
                         <-> Tor Proxy 1
 Client <---->  HAproxy  <-> Tor Proxy 2
                         <-> Tor Proxy n
@@ -19,10 +19,10 @@ Usage
 
 ```bash
 # build docker container
-docker build -t anon/tor-rotating-proxy:only .
+docker build -t shaddysignal/tor-rotating-proxy:latest .
 
 # ... or pull docker container
-docker pull anon/tor-rotating-proxy:only
+docker pull shaddysignal/tor-rotating-proxy:latest
 
 # start docker container
 docker run -d -p 9050:9050 -p 4444:4444 --env tors=25 mattes/rotating-proxy # default tors=10
@@ -45,4 +45,3 @@ Further Readings
 --------------
 
 Thanks to mattes/rotating-proxy. Although it is a fork, so its obvious.
-
