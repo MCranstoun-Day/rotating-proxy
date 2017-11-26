@@ -6,9 +6,9 @@ docker-rotating-proxy
 ```
                Docker Container
                -------------------------------------
-                        <-> Polipo 1 <-> Tor Proxy 1
-Client <---->  HAproxy  <-> Polipo 2 <-> Tor Proxy 2
-                        <-> Polipo n <-> Tor Proxy n
+                        <-> Tor Proxy 1
+Client <---->  HAproxy  <-> Tor Proxy 2
+                        <-> Tor Proxy n
 ```
 
 __Why:__ Lots of IP addresses. One single endpoint for your client.
@@ -19,17 +19,16 @@ Usage
 
 ```bash
 # build docker container
-docker build -t mattes/rotating-proxy:latest .
+docker build -t anon/tor-rotating-proxy:only .
 
 # ... or pull docker container
-docker pull mattes/rotating-proxy:latest
+docker pull anon/tor-rotating-proxy:only
 
 # start docker container
-docker run -d -p 5566:5566 -p 4444:4444 --env tors=25 mattes/rotating-proxy
+docker run -d -p 9050:9050 -p 4444:4444 --env tors=25 mattes/rotating-proxy # default tors=10
 
 # test with ...
-curl --proxy 127.0.0.1:5566 http://echoip.com
-curl --proxy 127.0.0.1:5566 http://header.jsontest.com
+curl -x socks5://127.0.0.1:9050 http://ipinfo.io/ip
 
 # monitor
 http://127.0.0.1:4444/haproxy?stats
@@ -42,11 +41,8 @@ Further Readings
  * [Tor Manual](https://www.torproject.org/docs/tor-manual.html.en)
  * [Tor Control](https://www.thesprawl.org/research/tor-control-protocol/)
  * [HAProxy Manual](http://cbonte.github.io/haproxy-dconv/configuration-1.5.html)
- * [Polipo](http://www.pps.univ-paris-diderot.fr/~jch/software/polipo/)
 
 --------------
 
-Please note: Tor offers a SOCKS Proxy only. In order to allow communication
-from HAproxy to Tor, Polipo is used to translate from HTTP proxy to SOCKS proxy.
-HAproxy is able to talk to HTTP proxies only.
+Thanks to mattes/rotating-proxy. Although it is a fork, so its obvious.
 
