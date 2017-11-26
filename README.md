@@ -1,7 +1,7 @@
 docker-rotating-proxy
 =====================
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/mattes/rotating-proxy.svg)](https://hub.docker.com/r/mattes/rotating-proxy/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/shaddysignal/tor-rotating-proxy.svg)](https://hub.docker.com/r/shaddysignal/tor-rotating-proxy/)
 
 ```
                Docker Container
