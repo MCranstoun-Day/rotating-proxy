@@ -1,41 +1,40 @@
 global
-  maxconn 1024 
+  maxconn 1024
   daemon
   pidfile <%= pid_file %>
 
 defaults
-  mode http
+  mode    http
   maxconn 1024
   option  httplog
   option  dontlognull
   retries 3
-  timeout connect 5s
-  timeout client 60s
-  timeout server 60s
+  timeout connect 10s
+  timeout client 1200s
+  timeout server 1200s
 
-
-listen stats *:4444
+listen stats
+  bind            *:4444
   mode            http
   log             global
-  maxconn 10
-  clitimeout      100s
-  srvtimeout      100s
-  contimeout      100s
+  maxconn         10
   timeout queue   100s
-  stats enable
-  stats hide-version
-  stats refresh 30s
-  stats show-node
-  stats uri /haproxy?stats
+  stats           enable
+  stats           hide-version
+  stats           refresh 30s
+  stats           show-node
+  stats           uri /haproxy?stats
 
 
-frontend rotating_proxies
-  bind *:<%= port %>
+frontend entry-point
+  bind            *:<%= port %>
+  mode            tcp
+  option          tcplog
   default_backend tor
-  option http_proxy
 
 backend tor
-  option http_proxy
+  mode tcp
+  option tcplog
   balance leastconn # http://cbonte.github.io/haproxy-dconv/configuration-1.5.html#balance
 
   <% backends.each do |b| %>

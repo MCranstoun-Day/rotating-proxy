@@ -98,16 +98,16 @@ module Service
       super
       self.class.fire_and_forget(executable,
         "--SocksPort #{port}",
-	"--ControlPort #{control_port}",
+        "--ControlPort #{control_port}",
         "--NewCircuitPeriod 15",
-	"--MaxCircuitDirtiness 15",
-	"--UseEntryGuards 0",
-	"--UseEntryGuardsAsDirGuards 0",
-	"--CircuitBuildTimeout 5",
-	"--ExitRelay 0",
-	"--RefuseUnknownExits 0",
-	"--ClientOnly 1",
-	"--AllowSingleHopCircuits 1",
+        "--MaxCircuitDirtiness 15",
+        "--UseEntryGuards 0",
+        "--UpdateBridgesFromAuthority 1",
+        "--CircuitBuildTimeout 5",
+        "--ExitRelay 0",
+        "--RefuseUnknownExits 0",
+        "--ClientOnly 1",
+        "--AllowSingleHopCircuits 0",
         "--DataDirectory #{data_directory}",
         "--PidFile #{pid_file}",
         "--Log \"warn syslog\"",
@@ -116,68 +116,29 @@ module Service
     end
 
     def newnym
-        self.class.fire_and_forget('/usr/local/bin/newnym.sh',
-				   "#{control_port}",
-				   "| logger -t 'newnym'")
-    end
-  end
-
-  class Polipo < Base
-    def initialize(port, tor:)
-      super(port)
-      @tor = tor
-    end
-
-    def start
-      super
-      # https://gitweb.torproject.org/torbrowser.git/blob_plain/1ffcd9dafb9dd76c3a29dd686e05a71a95599fb5:/build-scripts/config/polipo.conf
-      if File.exists?(pid_file)
-        File.delete(pid_file)
-      end
-      self.class.fire_and_forget(executable,
-        "proxyPort=#{port}",
-        "socksParentProxy=127.0.0.1:#{tor_port}",
-        "socksProxyType=socks5",
-        "diskCacheRoot=''",
-        "disableLocalInterface=true",
-        "allowedClients=127.0.0.1",
-        "localDocumentRoot=''",
-        "disableConfiguration=true",
-        "dnsUseGethostbyname='yes'",
-        "logSyslog=true",
-        "daemonise=true",
-        "pidFile=#{pid_file}",
-        "disableVia=true",
-        "allowedPorts='1-65535'",
-        "tunnelAllowedPorts='1-65535'",
-        "| logger -t 'polipo' 2>&1")
-    end
-
-    def tor_port
-      @tor.port
+      self.class.fire_and_forget('/usr/local/bin/newnym.sh',
+        "#{control_port}",
+        "| logger -t 'newnym'")
     end
   end
 
   class Proxy
     attr_reader :id
-    attr_reader :tor, :polipo
+    attr_reader :tor
 
     def initialize(id)
       @id = id
       @tor = Tor.new(tor_port, tor_control_port)
-      @polipo = Polipo.new(polipo_port, tor: tor)
     end
 
     def start
       $logger.info "starting proxy id #{id}"
       @tor.start
-      @polipo.start
     end
 
     def stop
       $logger.info "stopping proxy id #{id}"
       @tor.stop
-      @polipo.stop
     end
 
     def restart
@@ -194,10 +155,7 @@ module Service
       30000 + id
     end
 
-    def polipo_port
-      tor_port + 10000
-    end
-    alias_method :port, :polipo_port
+    alias_method :port, :tor_port
 
     def test_url
       ENV['test_url'] || 'http://icanhazip.com'
@@ -247,7 +205,8 @@ module Service
   end
 end
 
-haproxy = Service::Haproxy.new
+
+haproxy = Service::Haproxy.new(9050)
 proxies = []
 
 tor_instances = ENV['tors'] || 10
@@ -260,8 +219,8 @@ end
 
 haproxy.start
 
-sleep 60
-
+# Each 5 min reset proxies
+sleep 600
 loop do
   $logger.info "resetting circuits"
   proxies.each do |proxy|
@@ -275,6 +234,6 @@ loop do
     proxy.restart unless proxy.working?
   end
 
-  $logger.info "sleeping for 60 seconds"
-  sleep 60
+  $logger.info "sleeping for 600 seconds"
+  sleep 600
 end
