@@ -1,4 +1,4 @@
-FROM ruby:2.4-alpine3.6
+FROM ruby:2.6-alpine3.10
 MAINTAINER Anon <someone@shaddy.space>
 
 RUN apk update && \

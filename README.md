@@ -25,10 +25,10 @@ docker build -t shaddysignal/tor-rotating-proxy:latest .
 docker pull shaddysignal/tor-rotating-proxy:latest
 
 # start docker container
-docker run -d -p 9050:9050 -p 4444:4444 --env tors=25 mattes/rotating-proxy # default tors=10
+docker run -d -p 9050:9050 -p 4444:4444 --env tors=8 shaddysignal/tor-rotating-proxy # default tors=10
 
 # test with ...
-curl -x socks5://127.0.0.1:9050 http://ipinfo.io/ip
+curl -x socks5://127.0.0.1:9050 http://checkip.dyndns.org/
 
 # monitor
 http://127.0.0.1:4444/haproxy?stats
