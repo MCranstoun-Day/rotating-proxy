@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require 'erb'
-require 'excon'
+require 'socksify'
 require 'logger'
 
 $logger = Logger.new(STDOUT, ENV['DEBUG'] ? Logger::DEBUG : Logger::INFO)
@@ -46,7 +46,8 @@ module Service
       if File.exists?(pid_file)
         pid = File.read(pid_file).strip
         begin
-          self.class.kill(pid.to_i)
+          $logger.debug "actual killing of #{service_name}:#{pid.to_i} on port #{port}"
+          self.class.kill(pid.to_i, signal='SIGTERM')
         rescue => e
           $logger.warn "couldn't kill #{service_name} on port #{port}: #{e.message}"
         end
@@ -61,14 +62,8 @@ module Service
 
     def self.fire_and_forget(*args)
       $logger.debug "running: #{args.join(' ')}"
-      pid = Process.fork
-      if pid.nil? then
-        # In child
-        exec args.join(" ")
-      else
-        # In parent
-        Process.detach(pid)
-      end
+      pid = Process.spawn(args.join(" "))
+      Process.detach(pid)
     end
 
     def self.which(executable)
@@ -158,11 +153,13 @@ module Service
     alias_method :port, :tor_port
 
     def test_url
-      ENV['test_url'] || 'http://icanhazip.com'
+      ENV['test_url'] || 'https://api4.my-ip.io'
     end
 
     def working?
-      Excon.get(test_url, proxy: "http://127.0.0.1:#{port}", :read_timeout => 10).status == 200
+      Socksify::proxy("127.0.0.1", port) {
+        Socksify::resolve(test_url)
+      }
     rescue
       false
     end

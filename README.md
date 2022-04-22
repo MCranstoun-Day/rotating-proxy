@@ -28,7 +28,7 @@ docker pull shaddysignal/tor-rotating-proxy:latest
 docker run -d -p 9050:9050 -p 4444:4444 --env tors=8 shaddysignal/tor-rotating-proxy # default tors=10
 
 # test with ...
-curl -x socks5://127.0.0.1:9050 http://checkip.dyndns.org/
+curl -x socks5://127.0.0.1:9050 http://api4.my-ip.io/ip
 
 # monitor
 http://127.0.0.1:4444/haproxy?stats

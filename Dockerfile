@@ -1,13 +1,11 @@
-FROM ruby:2.6-alpine3.10
+FROM ruby:3.1-slim
 MAINTAINER Anon <someone@shaddy.space>
 
-RUN apk update && \
-    apk add --update tor haproxy \
-    --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ && \
-    rm -rf /var/cache/apk/* && \
-    ln -s /lib/x86_64-linux-gnu/libssl.so.1.0.0 /lib/libssl.so.1.0.0
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tor haproxy netcat && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN gem install excon -v 0.44.4
+RUN gem install socksify
 
 ADD start.rb /usr/local/bin/start.rb
 RUN chmod +x /usr/local/bin/start.rb
