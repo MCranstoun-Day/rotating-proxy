@@ -29,6 +29,9 @@ docker run -d -p 9050:9050 -p 4444:4444 --env tors=8 shaddysignal/tor-rotating-p
 
 # test with ...
 curl -x socks5://127.0.0.1:9050 http://api4.my-ip.io/ip
+or
+curl -vx socks5://127.0.0.1:5566 https://api.ipify.org?format=json
+response: {"ip":"X.X.X.X"}* Connection #0 to host 127.0.0.1 left intact
 
 # monitor
 http://127.0.0.1:4444/haproxy?stats
